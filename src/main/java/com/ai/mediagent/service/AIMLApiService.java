@@ -1,23 +1,25 @@
 package com.ai.mediagent.service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
-import java.util.Map;
-import java.util.List;
+import java.util.*;
 
 @Service
 public class AIMLApiService {
 
-    @Value("${aiml.api.key}")
+    @Value("${groq.api.key}")
     private String apiKey;
 
     private final WebClient webClient;
+    private final ObjectMapper objectMapper;
 
     public AIMLApiService() {
         this.webClient = WebClient.builder()
-                .baseUrl("https://api.aimlapi.com/v1")
+                .baseUrl("https://api.groq.com/openai/v1")
                 .build();
+        this.objectMapper = new ObjectMapper();
     }
 
     public String analyzeSymptoms(String symptoms,
@@ -27,35 +29,72 @@ public class AIMLApiService {
                 "You are a medical symptom analyzer agent. " +
                         "Patient Details: Age: %s, Gender: %s. " +
                         "Symptoms: %s. " +
-                        "Analyze these symptoms and provide: " +
+                        "Analyze and provide: " +
                         "1. Possible conditions " +
                         "2. Severity level (Low/Medium/High) " +
                         "3. Recommended specialist type " +
-                        "4. Immediate next steps. " +
-                        "Be concise and professional.",
+                        "4. Immediate next steps.",
                 age, gender, symptoms
         );
+        return callGroqAPI(prompt);
+    }
 
-        Map<String, Object> requestBody = Map.of(
-                "model", "gpt-4o-mini",
-                "messages", List.of(
-                        Map.of("role", "user", "content", prompt)
-                ),
-                "max_tokens", 500
-        );
+    public String analyzeWithPrompt(String prompt) {
+        return callGroqAPI(prompt);
+    }
 
-        return webClient.post()
-                .uri("/chat/completions")
-                .header("Authorization", "Bearer " + apiKey)
-                .header("Content-Type", "application/json")
-                .bodyValue(requestBody)
-                .retrieve()
-                .bodyToMono(Map.class)
-                .map(response -> {
-                    List<Map> choices = (List<Map>) response.get("choices");
-                    Map message = (Map) choices.get(0).get("message");
-                    return (String) message.get("content");
-                })
-                .block();
+    private String callGroqAPI(String prompt) {
+        try {
+            String jsonBody = "{"
+                    + "\"model\": \"llama-3.3-70b-versatile\","
+                    + "\"messages\": ["
+                    + "  {"
+                    + "    \"role\": \"user\","
+                    + "    \"content\": \""
+                    + prompt.replace("\"", "'")
+                    .replace("\n", " ")
+                    .replace("\r", " ")
+                    + "\""
+                    + "  }"
+                    + "],"
+                    + "\"max_tokens\": 500,"
+                    + "\"temperature\": 0.7"
+                    + "}";
+
+            // DEBUG — print karo
+            System.out.println("=== GROQ REQUEST ===");
+            System.out.println(jsonBody);
+            System.out.println("=== API KEY ===");
+            System.out.println(apiKey.substring(0, 10) + "...");
+
+            return webClient.post()
+                    .uri("/chat/completions")
+                    .header("Authorization", "Bearer " + apiKey)
+                    .header("Content-Type", "application/json")
+                    .bodyValue(jsonBody)
+                    .retrieve()
+                    .onStatus(status -> status.is4xxClientError(),
+                            response -> response.bodyToMono(String.class)
+                                    .map(body -> {
+                                        // ERROR BODY PRINT KARO
+                                        System.out.println("=== ERROR BODY ===");
+                                        System.out.println(body);
+                                        return new RuntimeException(body);
+                                    }))
+                    .bodyToMono(Map.class)
+                    .map(response -> {
+                        List<Map> choices =
+                                (List<Map>) response.get("choices");
+                        Map msg =
+                                (Map) choices.get(0).get("message");
+                        return (String) msg.get("content");
+                    })
+                    .block();
+
+        } catch (Exception e) {
+            System.out.println("=== EXCEPTION ===");
+            System.out.println(e.getMessage());
+            return "Error: " + e.getMessage();
+        }
     }
 }

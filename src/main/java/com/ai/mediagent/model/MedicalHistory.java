@@ -4,13 +4,7 @@ import lombok.Data;
 import java.util.List;
 
 @Data
-public class SymptomRequest {
-    private String symptoms;
-    private String age;
-    private String gender;
-    private String location;
-
-    // Medical History fields
+public class MedicalHistory {
     private String patientName;
     private String bloodGroup;
     private List<String> existingConditions;

@@ -18,19 +18,25 @@ public class MedicalHistoryAgent {
         System.out.println("📋 Agent 2: Checking medical history...");
 
         String prompt = String.format(
-                "You are a medical history analyzer agent. " +
+                "You are a friendly health assistant. " +
+                        "Explain medical history analysis in very simple language " +
+                        "that a common person can understand easily. " +
                         "Patient History: " +
                         "Blood Group: %s, " +
                         "Existing Conditions: %s, " +
                         "Current Medications: %s, " +
                         "Allergies: %s. " +
-                        "Current Symptom Analysis: %s. " +
-                        "Based on this history: " +
-                        "1. Are there any risk factors? " +
-                        "2. Any medication conflicts? " +
-                        "3. Does history worsen current symptoms? " +
-                        "4. Special precautions needed? " +
-                        "Be concise and professional.",
+                        "Current Health Issue: %s. " +
+                        "Please provide in this EXACT format:\n\n" +
+                        "⚕️ HOW YOUR HISTORY AFFECTS YOU:\n" +
+                        "(Explain in simple 2-3 sentences)\n\n" +
+                        "💊 MEDICINE WARNINGS:\n" +
+                        "• (Simple warning 1 if any)\n" +
+                        "• (Simple warning 2 if any)\n\n" +
+                        "🛡️ EXTRA PRECAUTIONS FOR YOU:\n" +
+                        "• (Simple precaution 1)\n" +
+                        "• (Simple precaution 2)\n\n" +
+                        "Use very simple everyday language. No medical terms.",
                 history.getBloodGroup(),
                 history.getExistingConditions(),
                 history.getCurrentMedications(),

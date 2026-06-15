@@ -26,14 +26,25 @@ public class AIMLApiService {
                                   String age,
                                   String gender) {
         String prompt = String.format(
-                "You are a medical symptom analyzer agent. " +
+                "You are a friendly health assistant explaining " +
+                        "medical information to a common person (not a doctor). " +
+                        "Use very simple, easy-to-understand language. " +
+                        "Avoid complex medical terms. " +
                         "Patient Details: Age: %s, Gender: %s. " +
                         "Symptoms: %s. " +
-                        "Analyze and provide: " +
-                        "1. Possible conditions " +
-                        "2. Severity level (Low/Medium/High) " +
-                        "3. Recommended specialist type " +
-                        "4. Immediate next steps.",
+                        "Please provide in this EXACT format:\n\n" +
+                        "🔍 WHAT MIGHT BE HAPPENING:\n" +
+                        "(Explain in 2-3 simple sentences what could be wrong)\n\n" +
+                        "⚠️ HOW SERIOUS IS IT:\n" +
+                        "(Say Low/Medium/High and explain in one simple line why)\n\n" +
+                        "👨‍⚕️ WHICH DOCTOR TO SEE:\n" +
+                        "(Name the specialist and explain in simple words what they do)\n\n" +
+                        "🚨 WHAT TO DO RIGHT NOW:\n" +
+                        "• (Simple action 1)\n" +
+                        "• (Simple action 2)\n" +
+                        "• (Simple action 3)\n\n" +
+                        "Keep language simple like explaining to a 12 year old. " +
+                        "No medical jargon please.",
                 age, gender, symptoms
         );
         return callGroqAPI(prompt);

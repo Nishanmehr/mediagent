@@ -17,19 +17,25 @@ public class DoctorMatcherAgent {
         System.out.println("👨‍⚕️ Agent 3: Matching doctors...");
 
         String prompt = String.format(
-                "You are a doctor matching agent. " +
+                "You are a friendly health guide. " +
+                        "Help a common person understand which doctor to visit. " +
+                        "Use very simple language. " +
                         "Symptom Analysis: %s. " +
-                        "Medical History Analysis: %s. " +
-                        "Recommended Specialist: %s. " +
-                        "Based on this information provide: " +
-                        "1. Best specialist type needed " +
-                        "2. Urgency level (Emergency/Urgent/Normal) " +
-                        "3. Why this specialist is needed " +
-                        "4. What to tell the doctor " +
-                        "Be concise and professional.",
+                        "Medical History: %s. " +
+                        "Please provide in this EXACT format:\n\n" +
+                        "🏥 WHICH DOCTOR YOU NEED:\n" +
+                        "(Name the doctor type in simple words)\n\n" +
+                        "⏰ HOW URGENTLY YOU NEED TO GO:\n" +
+                        "(Emergency/Today/This Week — explain in one simple line)\n\n" +
+                        "📋 WHAT TO TELL THE DOCTOR:\n" +
+                        "• (Simple point 1)\n" +
+                        "• (Simple point 2)\n" +
+                        "• (Simple point 3)\n\n" +
+                        "💡 SIMPLE TIP:\n" +
+                        "(One helpful tip for the patient)\n\n" +
+                        "Keep it super simple and friendly.",
                 symptomResponse.getAnalysis(),
-                historyAnalysis,
-                symptomResponse.getRecommendedSpecialist()
+                historyAnalysis
         );
 
         String result = aimlApiService.analyzeWithPrompt(prompt);
